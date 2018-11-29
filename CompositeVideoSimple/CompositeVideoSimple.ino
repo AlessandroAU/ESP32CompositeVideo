@@ -9,8 +9,8 @@
 
 //PAL MAX, half: 324x268 full: 648x536
 //NTSC MAX, half: 324x224 full: 648x448
-const int XRES = 320;
-const int YRES = 200;
+const int XRES = 324;
+const int YRES = 224;
 
 //Graphics using the defined resolution for the backbuffer
 CompositeGraphics graphics(XRES, YRES);
@@ -27,10 +27,14 @@ Font<CompositeGraphics> font(6, 8, font6x8::pixels);
 
 #include <soc/rtc.h>
 
+
+
 void setup()
 {
   //highest clockspeed needed
   rtc_clk_cpu_freq_set(RTC_CPU_FREQ_240M);
+
+  Serial.begin(115200);
   
   //initializing DMA buffers and I2S
   composite.init();
@@ -49,7 +53,7 @@ void compositeCore(void *data)
   while (true)
   {
     //just send the graphics frontbuffer whithout any interruption 
-    composite.sendFrameHalfResolution(&graphics.frame);
+    composite.sendFrameSimpleVSYNC(&graphics.frame);
   }
 }
 
@@ -61,10 +65,12 @@ void draw()
   luni0.draw(graphics, 200, 10);
 
   //drawing a frame
-  graphics.fillRect(27, 18, 160, 30, 10);
+  //graphics.fillRect(0, 0, 324, 224, 20);
+  //graphics.rect(0, 0, 324, 224, 20);
   graphics.rect(27, 18, 160, 30, 20);
+  
 
-  //setting text color, transparent background
+  //setting text color, transparent back ground
   graphics.setTextColor(50);
   //text starting position
   graphics.setCursor(30, 20);
@@ -96,6 +102,8 @@ void draw()
 void loop()
 {
   draw();
+  delay(1000);
+  Serial.println(ESP.getFreeHeap());
 }
 
 
